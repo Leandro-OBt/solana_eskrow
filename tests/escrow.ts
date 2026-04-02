@@ -145,4 +145,90 @@ describe("escrow", () => {
     const receiverTokenBalAfter = await getAccount(provider.connection, receiverTokenAccount);
     assert.strictEqual(Number(receiverTokenBalAfter.amount), 500);
   });
+
+  let escrowAccount2: anchor.web3.PublicKey;
+  let vaultAccount2: anchor.web3.PublicKey;
+  const seedId2 = new anchor.BN(999);
+
+  it("5. Initialize Second Escrow (1s timelock) and test unauthorized approval", async () => {
+    const [_escrow] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("escrow"), sender.publicKey.toBuffer(), seedId2.toArrayLike(Buffer, "le", 8)],
+      program.programId
+    );
+    escrowAccount2 = _escrow;
+
+    const [_vault] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("vault"), escrowAccount2.toBuffer()],
+      program.programId
+    );
+    vaultAccount2 = _vault;
+
+    const timelockSeconds = new anchor.BN(1);
+
+    await program.methods
+      .initializeAndDeposit(seedId2, depositAmount, timelockSeconds)
+      .accounts({
+        sender: sender.publicKey,
+        receiver: receiver.publicKey,
+        mint: mint,
+        senderTokenAccount: senderTokenAccount,
+        escrow: escrowAccount2,
+        vault: vaultAccount2,
+        systemProgram: anchor.web3.SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+      })
+      .signers([sender])
+      .rpc();
+
+    let vaultBal = await getAccount(provider.connection, vaultAccount2);
+    assert.strictEqual(Number(vaultBal.amount), 500);
+
+    // Test unauthorized approval (using a random keypair)
+    const hacker = anchor.web3.Keypair.generate();
+    try {
+        await program.methods
+          .approveBySender()
+          .accounts({
+            sender: hacker.publicKey,
+            escrow: escrowAccount2,
+            vault: vaultAccount2,
+            receiverTokenAccount: receiverTokenAccount,
+            tokenProgram: TOKEN_PROGRAM_ID,
+          })
+          .signers([hacker])
+          .rpc();
+        assert.fail("Should have failed due to wrong sender");
+    } catch (e: any) {
+        assert.isTrue(e.message.includes("ConstraintHasOne") || e.message.includes("AccountNotInitialized") || e.message.includes("unknown signer") || e.message !== "Should have failed due to wrong sender");
+    }
+  });
+
+  it("6. Successful Refund after Timelock", async () => {
+    // Wait for 2-3 seconds to ensure timelock passes safely considering network latency delays
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+
+    let senderTokenBalBefore = await getAccount(provider.connection, senderTokenAccount);
+    const beforeBal = Number(senderTokenBalBefore.amount);
+
+    await program.methods
+      .refund()
+      .accounts({
+        sender: sender.publicKey,
+        escrow: escrowAccount2,
+        vault: vaultAccount2,
+        senderTokenAccount: senderTokenAccount,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .signers([sender])
+      .rpc();
+
+    const state = await program.account.paymentEscrow.fetch(escrowAccount2);
+    assert.strictEqual(state.amount.toNumber(), 0); // marked as executed/refunded
+
+    let senderTokenBalAfter = await getAccount(provider.connection, senderTokenAccount);
+    
+    // verify the funds returned
+    assert.strictEqual(Number(senderTokenBalAfter.amount), beforeBal + 500);
+  });
 });

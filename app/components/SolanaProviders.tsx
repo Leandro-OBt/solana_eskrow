@@ -15,7 +15,8 @@ import {
 import "@solana/wallet-adapter-react-ui/styles.css";
 
 const NETWORK_ENDPOINT =
-  process.env.NEXT_PUBLIC_RPC_URL ?? "http://127.0.0.1:8899";
+  process.env.NEXT_PUBLIC_RPC_URL ?? "https://api.devnet.solana.com";
+// process.env.NEXT_PUBLIC_RPC_URL ?? "http://127.0.0.1:8899";
 
 export const SolanaProviders: FC<{ children: ReactNode }> = ({ children }) => {
   const wallets = useMemo(
