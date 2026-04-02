@@ -64,7 +64,8 @@ export default function EscrowApp() {
                 } catch {
                     return false; // Ignora contas com schema antigo/corrompido
                 }
-            });
+            })
+            .sort((a: any, b: any) => b.account.createdAt.toNumber() - a.account.createdAt.toNumber());
         setEscrows(myEscrows);
     } catch (e) {
         console.error("Failed to fetch escrows", e);
@@ -103,6 +104,13 @@ export default function EscrowApp() {
 
   const handleDeposit = async () => {
     if (!program || !publicKey) return;
+
+    const depositAmount = Number(amount);
+    if (wSolBal === null || wSolBal < depositAmount) {
+        setMsg(`Saldo insuficiente: Você possui apenas ${wSolBal || 0} wSOL na carteira.`);
+        return;
+    }
+
     setLoading(true);
     setMsg("Criando transação de Escrow...");
     try {
@@ -176,7 +184,11 @@ export default function EscrowApp() {
         fetchBalance();
     } catch (e: any) {
         console.error(e);
-        setMsg(`Erro na transação: ${e.message}`);
+        if (e.message?.includes("0x1") || e.message?.includes("custom program error") || e.message?.includes("Simulation failed")) {
+            setMsg("Erro: Saldo insuficiente. Você não possui a quantidade exata de wSOL na carteira para realizar esse depósito.");
+        } else {
+            setMsg(`Erro na transação: ${e.message}`);
+        }
     } finally {
         setLoading(false);
     }
@@ -282,13 +294,19 @@ export default function EscrowApp() {
   return (
     <div className={styles.dashboard}>
       <header className={styles.header}>
-        <div className={styles.logo}>✦ DeferPay Escrow</div>
+        <div className={styles.logo}>✦ Escrow de wSOL</div>
         <div style={{display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.9rem'}}>
             {solBal !== null && <div style={{color: '#fff', fontWeight: 'bold'}}>SOL: {solBal.toFixed(2)}</div>}
             {wSolBal !== null && <div style={{color: '#92FE9D', fontWeight: 'bold'}}>wSOL: {wSolBal.toFixed(2)}</div>}
             <WalletMultiButton />
         </div>
       </header>
+
+      {solBal === 0 && (
+        <div className={styles.alertBox} style={{ backgroundColor: 'rgba(255, 50, 50, 0.2)', border: '1px solid #ff4d4d', color: '#ffb3b3' }}>
+          <span>Atenção: Sua carteira está sem SOL. Você precisa de SOL em caixa para pagar as taxas da rede.</span>
+        </div>
+      )}
 
       {msg && (
         <div className={styles.alertBox}>
@@ -310,7 +328,7 @@ export default function EscrowApp() {
              <p className={styles.desc}>Envie fundos que só serão liberados mediante confirmação dupla.</p>
           </div>
           <div className={styles.formGroup}>
-            <label>Endereço de Destino (Receiver)</label>
+            <label>Endereço de Destino</label>
             <input 
               className={styles.input} 
               value={receiverKey} 
@@ -319,7 +337,7 @@ export default function EscrowApp() {
             />
           </div>
           <div className={styles.formGroup}>
-            <label>Quantidade de Tokens a Depositar</label>
+            <label>Quantidade de wSOL</label>
             <input 
               className={styles.input} 
               type="number" 
@@ -346,7 +364,7 @@ export default function EscrowApp() {
         <div className={styles.card}>
             <div className={styles.cardHeader}>
              <h2>Painel de Transações</h2>
-             <p className={styles.desc}>Seus recebimentos aguardando aprovação e depósitos pendentes.</p>
+             <p className={styles.desc}>Recebimentos e envios pendentes.</p>
             </div>
             
             <div className={styles.list}>
@@ -372,7 +390,7 @@ export default function EscrowApp() {
                         return (
                             <div key={idx} className={styles.listItem}>
                                 <div className={styles.itemInfo}>
-                                    <div><strong>{role}:</strong> {e.account.amount.toNumber() / 1e9} Tokens</div>
+                                    <div><strong>{role}:</strong> {e.account.amount.toNumber() / 1e9} wSOL</div>
                                     <div className={styles.smallDate}>Contra-parte: {amSender ? e.account.receiver.toBase58().slice(0, 6) : e.account.sender.toBase58().slice(0, 6)}...</div>
                                     <div className={styles.smallDate}>Criado: {createdDate} (Trava: {timelockStr})</div>
                                     <div className={styles.status}>
