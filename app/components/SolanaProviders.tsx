@@ -16,6 +16,7 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 
 const NETWORK_ENDPOINT =
   process.env.NEXT_PUBLIC_RPC_URL ?? "https://api.devnet.solana.com";
+// Para testar na localnet (solana-test-validator), comente a linha acima e descomente a linha abaixo:
 // process.env.NEXT_PUBLIC_RPC_URL ?? "http://127.0.0.1:8899";
 
 export const SolanaProviders: FC<{ children: ReactNode }> = ({ children }) => {
