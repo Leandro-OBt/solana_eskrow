@@ -28,54 +28,46 @@ Isso é ideal para o mercado de Freelancers ou Prestadores de Serviço: o Client
 
 ---
 
-## 🚀 Como Rodar e Testar Localmente (Devnet)
+## 🚀 Como Executar o Projeto
 
-### Sumário de Tecnologias / Pré-requisitos
-- [Solana CLI](https://docs.solana.com/cli/install-solana-cli-tools)
-- [Anchor CLI](https://www.anchor-lang.com/docs/installation)
-- Node.js e Yarn
-- Extensão Web da Phantom Wallet configurada para a *Devnet*
+Este repositório atende a três objetivos principais para os desenvolvedores:
+- Validar as regras de segurança através da suíte de testes do Smart Contract
+- Rodar a interface gráfica (Frontend) acoplando as requisições ao contrato que já vive publicado na Devnet Solana.
+- Publicar o código-fonte do Smart Contract.
 
-### Passo a Passo da Instalação
+### Pré-requisitos
+- [Solana CLI](https://docs.solana.com/cli/install-solana-cli-tools) e [Anchor CLI](https://www.anchor-lang.com/docs/installation)
+- Node.js e Yarn instalados
+- Extensão Web da Phantom Wallet apontada para a *Devnet*
 
-**1. Configure a Solana CLI para Devnet e injete fundos de teste**
-Para bancar os custos de hospedagem do seu contrato você precisa de Devnet SOL na sua máquina:
+### 1. Validando a Segurança (Execução dos Testes)
+Para rodar a bateria de testes na sua máquina, execute:
 ```bash
-solana config set --url devnet
-solana airdrop 5
-```
-
-**2. Compile e lance o Smart Contract para a internet**
-```bash
+yarn install
 anchor build
-anchor deploy
+anchor test
 ```
-*(Após o deploy, a rede te devolverá o status confirmando seu espaço on-chain!)*
 
-**3. Inicie o Front-end**
-Em uma nova aba do terminal, vá para as pastas web e dê boot no servidor Next.js:
+### 2. Rodando o Front-end (Aplicação Next.js)
+A comunicação RPC já está fixamente apontada para o Program ID oficial na Devnet. Para interagir com ele através da tela gráfica, inicie o servidor local:
 ```bash
 cd app
 yarn install
 yarn dev
 ```
-Abra `http://localhost:3000` no seu navegador.
+Por fim, acesse o `http://localhost:3000`.
 
-**4. Setup da sua Carteira Phantom para Testes**
-Como o Escrow trabalha manipulando `wSOL` e não a moeda nativa crua que as Faucets dão, prepare sua carteira Phantom de navegador recém conectada no front-end rodando:
-```bash
-solana airdrop 5 <SUA_CHAVE_PUBLICA_DO_PHANTOM_AQUI>
-spl-token wrap 4 --fee-payer ~/.config/solana/id.json --owner <SUA_CHAVE_PUBLICA_DO_PHANTOM_AQUI>
-```
-
-Alternativamente, pode-se usar *faucets* como https://faucet.solana.com/ para obter wSOL diretamente na sua carteira e posteriormente usar o comando abaixo para converter SOL em wSOL:
+### 3. Alimentando sua Carteira Web com wSOL
+Como este Escrow retém e movimenta moedas em forma de SPL-Tokens, usaremos o **wSOL** nas transações. Para testar depósitos fictícios pela sua carteira Phantom, crie dinheiro de testes e transforme-os em token:
 
 ```bash
-spl-token wrap 4
+solana airdrop 5 <COLE_AQUI_A_CHAVE_PUBLICA_DO_SEU_PHANTOM>
+spl-token wrap 4 --fee-payer ~/.config/solana/id.json --owner <COLE_AQUI_A_CHAVE_PUBLICA_DO_SEU_PHANTOM>
 ```
 
+> *Fique à vontade também para usar faucets alternativos da internet como `https://faucet.solana.com/` e utilizar comandos de terminal `spl-token wrap` na sequência.*
 
-Tudo pronto! Seu saldo deverá aparecer no topo do dApp na internet, preparado para abrir quantos depósitos de longa duração você desejar experimentar!
+Com isso, o app mostrará seu saldo ali no topo da aplicação, e o cofre aceitará fundos da sua carteira na hora!
 
 ---
 
