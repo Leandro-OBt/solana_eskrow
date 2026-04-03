@@ -4,6 +4,8 @@ O **Escrow de wSOL** é um aplicativo distribuído (dApp) focado em **Pagamentos
 
 Criado com Rust/Anchor (Contratos Inteligentes) e Next.js (Interface Gráfica), este sistema visa extinguir o risco de calote ou de insatisfação num acordo, bloqueando fundos *on-chain* de forma que eles sejam liberados apenas mediante **Aprovação Mútua**.
 
+<img src="img/print.png" style="display: block; margin: 0 auto;" alt="Print mostrando o dApp em funcionamento." width="800"/>
+
 ---
 
 ## 🔑 Identificação do Contrato (Program)
