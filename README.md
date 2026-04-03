@@ -1,8 +1,8 @@
-# ✦ Escrow de wSOL (Solana App)
+# ✦ Escrow de wSOL (Solana dApp)
 
-O **Escrow de wSOL** é um aplicativo distribuído (DApp) focado em **Pagamentos com Retenção (Timelock/Escrow Unilateral)**, atualmente configurado para rodar na rede **Devnet** da Solana.
+O **Escrow de wSOL** é um aplicativo distribuído (dApp) focado em **Pagamentos com Retenção (Timelock/Escrow Unilateral)**, atualmente configurado para rodar na rede **Devnet** da Solana.
 
-Criado com Next.js (Interface Gráfica) e Rust/Anchor (Contratos Inteligentes), este sistema visa extinguir o risco de calote ou de insatisfação num acordo, bloqueando fundos on-chain de forma que eles sejam liberados apenas mediante "Aprovação Mútua".
+Criado com Rust/Anchor (Contratos Inteligentes) e Next.js (Interface Gráfica), este sistema visa extinguir o risco de calote ou de insatisfação num acordo, bloqueando fundos *on-chain* de forma que eles sejam liberados apenas mediante **Aprovação Mútua**.
 
 ---
 
@@ -14,33 +14,33 @@ Criado com Next.js (Interface Gráfica) e Rust/Anchor (Contratos Inteligentes), 
 
 ## 💡 Como Funciona (A Lógica Central)
 
-Diferente de um Escrow tradicional (onde dois usuários trocam Token X pelo Token Y simultaneamente), este aplicativo opera de forma **Unilateral com Dupla Assinatura**. 
+Este Escrow opera de forma **Unilateral com Dupla Assinatura**. 
 
-1. O **Remetente** deposita **wSOL** no cofre virtual (Vault) da Blockchain em nome do **Destinatário**.
-2. Ninguém toca nos tokens temporariamente.
-3. Ambos devem clicar em **Aprovar**. O programa confere as assinaturas digitais dos dois antes de destravar o Vault e entregar as moedas ao Destinatário.
+1. O **remetente** deposita **wSOL** no cofre virtual (*Vault*) da *Blockchain* em nome do **destinatário** e define um tempo mínimo durante o qual os fundos ficarão disponíveis (*timelock*).
+2. Quando o **destinatário** conecta sua *wallet* no dApp, ele consegue visualizar os depósitos em seu nome que estão aguardando aprovação.
+3. Somente quando ambos clicarem em **aprovar** e assinar a transação é que os tokens serão liberados para o **destinatário**. O programa confere as assinaturas digitais dos dois antes de destravar o *vault*.
 
-Isso é ideal para o mercado de Freelancers ou Prestadores de Serviço: o Cliente prova que tem o dinheiro (ele fica trancado), o Freelancer executa a tarefa provado de que o dinheiro existe, e ambos assinam para finalizar.
+Isso é ideal para o mercado de *freelancers* ou prestadores de serviço: o Cliente (remetende) prova que tem o dinheiro através do depósito no *vault on chain*. O *freelancer* (destinatário) executa a tarefa. Quando o trabalho for entregue, o *freelancer* assina a transação. Após aprovação da entrega, o cliente também assina a transação. Assim que ambos assinarem, os *tokens* são liberados para o *freelancer*.
 
 ### Escudo Anti-Golpes (Refund)
-- O Remetente configura um prazo limite rotulado de `Timelock`.
-- Se o acordo for quebrado e nenhuma aprovação definitiva acontecer, a própria Blockchain impede que a transação fique no limbo. Assim que expirar o Timelock, o aplicativo libera a trava e o Remetente consegue aplicar um **Estorno total automático (Refund)** resgatando seus wSOL do vault.
+- O remetente pode configurar um prazo limite rotulado de `Timelock`.
+- Se o acordo for quebrado e nenhuma aprovação definitiva acontecer, a própria *blockchain* impede que a transação fique no limbo. Assim que expirar o *timelock*, o dApp libera a trava e o remetente consegue fazer um **estorno total** (*refund*), recuperando seus wSOL de dentro do *vault*.
 
 ---
 
-## 🚀 Como Executar o Projeto
+## 🚀 Como usar o dApp
 
 Este repositório atende a três objetivos principais para os desenvolvedores:
-- Validar as regras de segurança através da suíte de testes do Smart Contract
-- Rodar a interface gráfica (Frontend) acoplando as requisições ao contrato que já vive publicado na Devnet Solana.
-- Publicar o código-fonte do Smart Contract.
+- Validar as regras de segurança através da suíte de testes do *smart contract*
+- Rodar a interface gráfica (*frontend*) acoplando as requisições ao contrato que já está publicado na *devnet* Solana.
+- Publicar o código-fonte do *smart contract*.
 
 ### Pré-requisitos
 - [Solana CLI](https://docs.solana.com/cli/install-solana-cli-tools) e [Anchor CLI](https://www.anchor-lang.com/docs/installation)
 - Node.js e Yarn instalados
 - Extensão Web da Phantom Wallet apontada para a *Devnet*
 
-### 1. Validando a Segurança (Execução dos Testes)
+### 1. Validando a Segurança (Execução dos testes)
 Para rodar a bateria de testes na sua máquina, execute:
 ```bash
 yarn install
@@ -48,7 +48,7 @@ anchor build
 anchor test
 ```
 
-### 2. Rodando o Front-end (Aplicação Next.js)
+### 2. Rodando o front-end (Aplicação Next.js)
 A comunicação RPC já está fixamente apontada para o Program ID oficial na Devnet. Para interagir com ele através da tela gráfica, inicie o servidor local:
 ```bash
 cd app
@@ -57,45 +57,36 @@ yarn dev
 ```
 Por fim, acesse o `http://localhost:3000`.
 
-### 3. Alimentando sua Carteira Web com wSOL
-Como este Escrow retém e movimenta moedas em forma de SPL-Tokens, usaremos o **wSOL** nas transações. Para testar depósitos fictícios pela sua carteira Phantom, crie dinheiro de testes e transforme-os em token:
+### 3. Alimentando sua wallet com wSOL
+Como este Escrow retém e movimenta moedas em forma de SPL-Tokens, usaremos o **wSOL** nas transações. Para testar depósitos fictícios pela sua carteira wallet (por exemplo, Phantom), crie dinheiro de testes e transforme-os em token:
 
 ```bash
 solana airdrop 5 <COLE_AQUI_A_CHAVE_PUBLICA_DO_SEU_PHANTOM>
 spl-token wrap 4 --fee-payer ~/.config/solana/id.json --owner <COLE_AQUI_A_CHAVE_PUBLICA_DO_SEU_PHANTOM>
 ```
 
-> *Fique à vontade também para usar faucets alternativos da internet como `https://faucet.solana.com/` e utilizar comandos de terminal `spl-token wrap` na sequência.*
+Fique à vontade também para usar *faucets* alternativos da internet como `https://faucet.solana.com/`. Nesse caso, use comandos de terminal `spl-token wrap` na sequência para transformar SOL em wSOL.
 
-Com isso, o app mostrará seu saldo ali no topo da aplicação, e o cofre aceitará fundos da sua carteira na hora!
+Com isso, o app mostrará seu saldo no canto superior direito da aplicação e o cofre aceitará fundos da sua carteira!
 
----
-
-## 🔧 Diferenciais Técnicos de Estrutura
-
-- **Contas de Token Implícitas ("O Carteiro Educado"):** 
-  Na Solana, para receber qualquer cripto que não seja o próprio SOL nativo (como o nosso wSOL), sua carteira precisa "abrir uma pequena gaveta" específica para aquela moeda, chamada ATA. Normalmente, se tentarem te enviar um token e você não tiver a gaveta dele, a blockchain joga um erro e trava o dinheiro. 
-  Para esconder essa dor do usuário, nós usamos instruções matemáticas do tipo **Idempotent**. Ela age como um "carteiro educado": Se o Destinatário já possui a gaveta para wSOL, o carteiro interage direto; se o Destinatário não possui a gaveta do wSOL ou a deletou sem querer, o próprio carteiro (o front-end do DApp) aciona os pedreiros da Blockchain, cria a gaveta às próprias custas, e derrama as moedas perfeitamente sem mostrar uma única tela de falha ao pagador ou recebedor.
-
-- **Ordens de Consultas na Chain:** 
-  O histórico de acordos na interface web puxa as contas brutas de dentro do Blockchain filtrando dados temporais decadentes (onde o mais recém criado é listado primeiro), provando maturidade ao tratar contas estáticas como banco de dados ágeis num front-end reativo.
+IMPORTANTE! Lembre-se de que você precisará de **SOL** para pagar as taxas da rede para depositar **wSOL** no *vault*.
 
 ---
 
 ## 🔮 Visão de Futuro e Escalabilidade (Roadmap)
 
-Embora a infraestrutura unilateral com dupla aprovação já sustente perfeitamente o B2B e o mercado criativo, existem diversas rotas atrativas para expandir o ecossistema do **wSOL Escrow**:
+Embora a infraestrutura unilateral com dupla aprovação já sustente perfeitamente o B2B e o mercado de freelancers, existem diversas rotas atrativas para expandir o ecossistema do **wSOL Escrow**:
 
 ### 1. Tribunal Descentralizado (Multi-Sig para Disputas)
-Adicionar a possibilidade de inserir a chave pública de um **Árbitro ou Plataforma** no momento da formulação do pagamento. Em eventuais divergências intransponíveis sobre o trabalho realizado, um botão de "Disputa" transferiria as alavancas de poder (Approve/Refund) para este Árbitro terceirizado avaliar provas na vida real e decidir para qual das pontas despachar os fundos.
+Adicionar a possibilidade de inserir a chave pública de um **árbitro** no momento da formulação do pagamento. Em eventuais divergências sobre o trabalho realizado, um botão de "Disputa" transferiria a decisão final de liberar os tokens para o destinatário ou retorná-los para o remetende.
 
-### 2. Contratos com Coração Vivo (Oráculos & Agentes de IA Autônomos)
+### 2. Contratos com Dados "Vivos" (Oráculos & Agentes de IA Autônomos)
 A aprovação não precisa depender do clique humano!
-- **Oráculos Financeiros:** Usar pontes de informação (como Switchboard ou Pyth) para acionar os pagamentos mediante APIs físicas. Exemplo: "Comprei algo. Quando os Correios baterem no status 'Entregue no CEP X', aciona o Escudo do Escrow que automaticamente dispara o `Approve` e libera à loja comercial."
+- **Oráculos:** Usar pontes de informação (como Switchboard) para acionar os pagamentos de acordo com dados retornados por APIs que trazem dados do mundo real para a blockchain. Exemplo: Uma vault pode ser criada ao comprar algo de uma loja ou outra pessoa pela internet. Quando os Correios baterem no status 'Entregue no CEP X', aciona o oráculo que se comunica com o Escrow que automaticamente dispara o `Approve` e libera os tokens à loja."
 - **Agentes Analistas de IA:** Para equipes de software e bounties, uma I.A. dedicada e com sua própria `PublicKey` poderia ser a Juíza, capaz de revisar o código que você entregou num repositório e atirar o pagamento da recompensa liberando os wSOL após detectar um "Merge" bem sucedido sem falhas de arquitetura.
 
 ### 3. Juros Compostos no Cofre (Yield-Bearing Vaults)
-Existem acordos comerciais complexos de engenharia cujos pagamentos ficam travados por seis ou mais meses em cofres até as obras saírem do chão. Ao invés do dinheiro ficar inerte na Blockchain, é possível plugar os Vaults diretamente ao ecossistema do **Kamino Finance ou Marginfi**, rentabilizando os tokens enquanto permanecem no cofre. O rendimento contínuo gerado seria convertido em lucro vitalício doEscrow (O dono do App) sem tocar ou arriscar o dinheiro do trabalhador e sem onerar os clientes.
+Alguns acordos ou contratos envolvem pagamentos que podem ficar travados por meses ou até anos. Em vez do dinheiro ficar inerte na vault, é possível plugar o dApp diretamente ao ecossistema DeFi, como **Kamino Finance** por exemplo, rentabilizando os tokens enquanto permanecem no cofre através de operações de lending ou até alimentando pools de liquidez. O rendimento gerado seria convertido poderia ser retirado como pagamento pelo serviço prestado (sem onerar o usuário) ou poderia ser oferecido aos usuários do dApp como uma forma de incentivar seu uso.
 
 ### 4. Swap Transparente Cross-Token
-Fazer o depósito da garantia trancar $USDC no Cofre, porém, durante a retirada, embarcar um roteamento cross-program para a agregadora **Jupiter Swap**. Isso permitiria que o freelancer selecionasse opções do tipo *"Receber em BONK"* na hora que for clicar no Approve final, saindo direto pro token desejado através das dezenas de pools da própria infraestrutura da DEX da Solana, de forma totalmente abstraída para o usuário final.
+Na hora de receber os tokens da vault, o destinatário poderia selecionar um token diferente do que está na vaul para receber (Exemplo: Remetende depositou USDC e destinatário quer receber em wSOL). Nesse caso, poderia ser feito um roteamento para a agregadora **Jupiter Swap**. Isso permitiria que o remetende recebesse através das dezenas de pools da própria infraestrutura de DEX da Solana de forma totalmente abstraída para o usuário final.
