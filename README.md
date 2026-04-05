@@ -79,16 +79,19 @@ IMPORTANTE! Lembre-se de que você precisará de **SOL** para pagar as taxas da 
 
 Embora a infraestrutura unilateral com dupla aprovação já sustente perfeitamente o B2B e o mercado de freelancers, existem diversas rotas atrativas para expandir o ecossistema do **wSOL Escrow**:
 
-### 1. Tribunal Descentralizado (Multi-Sig para Disputas)
+### 1. Suporte para stablecoins e outros tokens
+Expandir o suporte do sistema de escrow para stablecoins como USDC, USDT, PYUSD e afins será essencial para aumentar a usabilidade no mundo real por dar mais previsibilidade aos pagamentos, principalmente para aqueles relacionados a contratos de prazo mais longo.
+
+### 2. Tribunal Descentralizado (Multi-Sig para Disputas)
 Adicionar a possibilidade de inserir a chave pública de um **árbitro** no momento da formulação do pagamento. Em eventuais divergências sobre o trabalho realizado, um botão de "Disputa" transferiria a decisão final de liberar os tokens para o destinatário ou retorná-los para o remetende.
 
-### 2. Contratos com Dados "Vivos" (Oráculos & Agentes de IA Autônomos)
+### 3. Contratos com Dados "Vivos" (Oráculos & Agentes de IA Autônomos)
 A aprovação não precisa depender do clique humano!
 - **Oráculos:** Usar pontes de informação (como Switchboard) para acionar os pagamentos de acordo com dados retornados por APIs que trazem dados do mundo real para a blockchain. Exemplo: Uma vault pode ser criada ao comprar algo de uma loja ou outra pessoa pela internet. Quando os Correios baterem no status 'Entregue no CEP X', aciona o oráculo que se comunica com o Escrow que automaticamente dispara o `Approve` e libera os tokens à loja."
 - **Agentes Analistas de IA:** Para equipes de software e bounties, uma I.A. dedicada e com sua própria `PublicKey` poderia ser a Juíza, capaz de revisar o código que você entregou num repositório e atirar o pagamento da recompensa liberando os wSOL após detectar um "Merge" bem sucedido sem falhas de arquitetura.
 
-### 3. Juros Compostos no Cofre (Yield-Bearing Vaults)
+### 4. Juros Compostos no Cofre (Yield-Bearing Vaults)
 Alguns acordos ou contratos envolvem pagamentos que podem ficar travados por meses ou até anos. Em vez do dinheiro ficar inerte na vault, é possível plugar o dApp diretamente ao ecossistema DeFi, como **Kamino Finance** por exemplo, rentabilizando os tokens enquanto permanecem no cofre através de operações de lending ou até alimentando pools de liquidez. O rendimento gerado seria convertido poderia ser retirado como pagamento pelo serviço prestado (sem onerar o usuário) ou poderia ser oferecido aos usuários do dApp como uma forma de incentivar seu uso.
 
-### 4. Swap Transparente Cross-Token
+### 5. Swap Transparente Cross-Token
 Na hora de receber os tokens da vault, o destinatário poderia selecionar um token diferente do que está na vaul para receber (Exemplo: Remetende depositou USDC e destinatário quer receber em wSOL). Nesse caso, poderia ser feito um roteamento para a agregadora **Jupiter Swap**. Isso permitiria que o remetende recebesse através das dezenas de pools da própria infraestrutura de DEX da Solana de forma totalmente abstraída para o usuário final.
